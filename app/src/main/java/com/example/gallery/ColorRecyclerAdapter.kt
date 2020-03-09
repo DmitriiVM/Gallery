@@ -10,16 +10,22 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.image_item.view.*
 
-class ColorRecyclerAdapter(private val listener: OnItemClickListener) :
-    RecyclerView.Adapter<ColorRecyclerAdapter.ColorViewHolder>() {
+class ColorRecyclerAdapter(
+    private val listener: OnItemClickListener,
+    private val longListener: OnItemLongClickListener
+) : RecyclerView.Adapter<ColorRecyclerAdapter.ColorViewHolder>() {
 
     interface OnItemClickListener {
         fun onItemClick(uri: Uri)
     }
 
-    private var imageUriList = arrayListOf<Uri>()
+    interface OnItemLongClickListener {
+        fun onItemLongClick(uri: Uri)
+    }
 
-    fun setImages(imageUriList: ArrayList<Uri>) {
+    private var imageUriList = listOf<Uri>()
+
+    fun setImages(imageUriList: List<Uri>) {
         this.imageUriList = imageUriList
         notifyDataSetChanged()
     }
@@ -31,7 +37,8 @@ class ColorRecyclerAdapter(private val listener: OnItemClickListener) :
                 parent,
                 false
             ),
-            listener
+            listener,
+            longListener
         )
 
     override fun getItemCount(): Int = imageUriList.size
@@ -40,10 +47,10 @@ class ColorRecyclerAdapter(private val listener: OnItemClickListener) :
         holder.onBind(imageUriList[position])
     }
 
-
     class ColorViewHolder(
         private val view: View,
-        private val listener: OnItemClickListener
+        private val listener: OnItemClickListener,
+        private val longListener: OnItemLongClickListener
     ) : RecyclerView.ViewHolder(view) {
         fun onBind(uri: Uri) {
             val progress = CircularProgressDrawable(view.context).apply {
@@ -57,7 +64,10 @@ class ColorRecyclerAdapter(private val listener: OnItemClickListener) :
 
             view.setOnClickListener {
                 listener.onItemClick(uri)
-
+            }
+            view.setOnLongClickListener {
+                longListener.onItemLongClick(uri)
+                return@setOnLongClickListener true
             }
         }
     }

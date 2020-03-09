@@ -1,20 +1,27 @@
 package com.example.gallery
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.view.MotionEvent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.image_preview.*
 
-class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListener {
+class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListener,
+    ColorRecyclerAdapter.OnItemLongClickListener {
 
     private lateinit var adapter: ColorRecyclerAdapter
-    private var imageUriList = arrayListOf<Uri>()
+    private var imageUriList = listOf<Uri>()
+    private lateinit var dialog: Dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,38 +34,68 @@ class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListen
     }
 
     private fun setRecyclerView() {
-        val numberOfRows =
-            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                NUMBER_OF_ROWS_PORTRAIT
-            } else {
-                NUMBER_OF_ROWS_HORIZONTAL
-            }
-        recyclerView.layoutManager =
-            GridLayoutManager(this, numberOfRows, GridLayoutManager.HORIZONTAL, false)
-        recyclerView.addItemDecoration(MarginItemDecoration(20))
-        adapter = ColorRecyclerAdapter(this)
+        recyclerView.apply {
+            layoutManager =
+                GridLayoutManager(
+                    this@MainActivity,
+                    getNumberOfRows(),
+                    GridLayoutManager.HORIZONTAL,
+                    false
+                )
+            addItemDecoration(
+                getDivider(GridLayoutManager.VERTICAL, R.drawable.recyclerview_divider_horizontal)
+            )
+            addItemDecoration(
+                getDivider(GridLayoutManager.HORIZONTAL, R.drawable.recyclerview_divider_vertical)
+            )
+            addOnItemTouchListener(onItemTouchListener)
+        }
+        adapter = ColorRecyclerAdapter(this, this)
         recyclerView.adapter = adapter
+    }
+
+    private fun getNumberOfRows() =
+        when (resources.configuration.orientation) {
+            Configuration.ORIENTATION_PORTRAIT -> NUMBER_OF_ROWS_PORTRAIT
+            else -> NUMBER_OF_ROWS_HORIZONTAL
+        }
+
+    private fun getDivider(orientation: Int, drawable: Int) =
+        DividerItemDecoration(this, orientation).apply {
+            setDrawable(resources.getDrawable(drawable, null))
+        }
+
+    private val onItemTouchListener = object : RecyclerView.OnItemTouchListener {
+        override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+
+        override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+
+            if (e.action == MotionEvent.ACTION_UP &&
+                this@MainActivity::dialog.isInitialized && dialog.isShowing) {
+                dialog.dismiss()
+            }
+            return false
+        }
+
+        override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         val stringImageList = savedInstanceState.getStringArrayList(KEY_IMAGE_URI_LIST)
-
-        imageUriList = stringImageList?.map { Uri.parse(it) } as ArrayList<Uri>
+        imageUriList = stringImageList?.map { Uri.parse(it) } ?: return
         adapter.setImages(imageUriList)
         super.onRestoreInstanceState(savedInstanceState)
     }
 
     private fun openDirectory() {
         Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             startActivityForResult(this, OPEN_DOCUMENT_TREE_CODE)
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == OPEN_DOCUMENT_TREE_CODE && resultCode == Activity.RESULT_OK) {
-            val directoryUri = data?.data ?: return
-            getPictures(directoryUri)
+            getPictures(data?.data ?: return)
         }
     }
 
@@ -68,7 +105,7 @@ class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListen
 
         imageUriList = documents.filter {
             it.type == "image/jpeg" || it.type == "image/png" || it.type == "image/jpg"
-        }.map { it.uri } as ArrayList<Uri>
+        }.map { it.uri }
 
         adapter.setImages(imageUriList)
     }
@@ -79,6 +116,14 @@ class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListen
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             startActivity(this)
         }
+    }
+
+    override fun onItemLongClick(uri: Uri) {
+        val view = layoutInflater.inflate(R.layout.image_preview, null)
+        dialog = Dialog(this, R.style.CustomDialog)
+        dialog.setContentView(view)
+        Picasso.get().load(uri).into(dialog.imagePreview)
+        dialog.show()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
