@@ -12,7 +12,7 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Picasso
+import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.image_preview.*
 
@@ -123,10 +123,7 @@ class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListen
         val view = layoutInflater.inflate(R.layout.image_preview, null)
         dialog = Dialog(this, R.style.CustomDialog)
         dialog.setContentView(view)
-        Picasso.get()
-            .load(uri)
-            .resize(0, resources.displayMetrics.widthPixels)
-            .into(dialog.imagePreview)
+        Glide.with(this).load(uri).into(dialog.imagePreview)
         dialog.show()
     }
 
