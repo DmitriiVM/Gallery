@@ -36,12 +36,13 @@ class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListen
     private fun setRecyclerView() {
         recyclerView.apply {
             layoutManager =
-                GridLayoutManager(
+                PreCachingLayoutManager(
                     this@MainActivity,
                     getNumberOfRows(),
                     GridLayoutManager.HORIZONTAL,
                     false
                 )
+            setHasFixedSize(true)
             addItemDecoration(
                 getDivider(GridLayoutManager.VERTICAL, R.drawable.recyclerview_divider_horizontal)
             )
@@ -71,7 +72,7 @@ class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListen
         override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
 
             if (e.action == MotionEvent.ACTION_UP &&
-                this@MainActivity::dialog.isInitialized && dialog.isShowing) {
+                ::dialog.isInitialized && dialog.isShowing) {
                 dialog.dismiss()
             }
             return false
@@ -122,7 +123,10 @@ class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListen
         val view = layoutInflater.inflate(R.layout.image_preview, null)
         dialog = Dialog(this, R.style.CustomDialog)
         dialog.setContentView(view)
-        Picasso.get().load(uri).into(dialog.imagePreview)
+        Picasso.get()
+            .load(uri)
+            .resize(0, resources.displayMetrics.widthPixels)
+            .into(dialog.imagePreview)
         dialog.show()
     }
 

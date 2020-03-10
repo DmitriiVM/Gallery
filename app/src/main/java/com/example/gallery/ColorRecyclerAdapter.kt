@@ -1,12 +1,11 @@
 package com.example.gallery
 
-import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.image_item.view.*
 
@@ -53,13 +52,16 @@ class ColorRecyclerAdapter(
         private val longListener: OnItemLongClickListener
     ) : RecyclerView.ViewHolder(view) {
         fun onBind(uri: Uri) {
-            val progress = CircularProgressDrawable(view.context).apply {
-                strokeWidth = 10f
-                centerRadius = 50f
+
+            val height = when (view.resources.configuration.orientation) {
+                Configuration.ORIENTATION_PORTRAIT -> view.resources.displayMetrics.heightPixels/4
+                else -> view.resources.displayMetrics.heightPixels/2
             }
 
             Picasso.get().load(uri)
-                .placeholder(progress)
+                .placeholder(R.drawable.ic_image_black_24dp)
+                .resize(height, 0)
+                .noFade()
                 .into(view.imageView)
 
             view.setOnClickListener {
