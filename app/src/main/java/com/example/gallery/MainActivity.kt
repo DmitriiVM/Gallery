@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListen
         setContentView(R.layout.activity_main)
 
         setRecyclerView()
-        button.setOnClickListener {
+        buttonOpenDirectory.setOnClickListener {
             openDirectory()
         }
     }
@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListen
         dialog.setContentView(view)
         Picasso.get()
             .load(uri)
-            .resize(0, resources.displayMetrics.widthPixels)
+            .fit()
             .into(dialog.imagePreview)
         dialog.show()
     }
@@ -138,10 +138,10 @@ class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListen
     }
 
     companion object {
-        internal const val NUMBER_OF_ROWS_HORIZONTAL = 2
-        internal const val NUMBER_OF_ROWS_PORTRAIT = 4
-        internal const val OPEN_DOCUMENT_TREE_CODE = 0
-        internal const val KEY_IMAGE_URI_LIST = "key_image_uri_list"
+        private const val NUMBER_OF_ROWS_HORIZONTAL = 2
+        private const val NUMBER_OF_ROWS_PORTRAIT = 4
+        private const val OPEN_DOCUMENT_TREE_CODE = 0
+        private const val KEY_IMAGE_URI_LIST = "key_image_uri_list"
     }
 }
 
