@@ -30,7 +30,7 @@ class ColorRecyclerAdapter(
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ColorViewHolder =
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         ColorViewHolder(
             LayoutInflater.from(parent.context).inflate(
                 R.layout.image_item,
