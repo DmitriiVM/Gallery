@@ -6,7 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Picasso
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.image_item.view.*
 
 class ColorRecyclerAdapter(
@@ -53,16 +54,7 @@ class ColorRecyclerAdapter(
     ) : RecyclerView.ViewHolder(view) {
         fun onBind(uri: Uri) {
 
-            val height = when (view.resources.configuration.orientation) {
-                Configuration.ORIENTATION_PORTRAIT -> view.resources.displayMetrics.heightPixels/4
-                else -> view.resources.displayMetrics.heightPixels/2
-            }
-
-            Picasso.get().load(uri)
-                .placeholder(R.drawable.ic_image_black_24dp)
-                .resize(height, 0)
-                .noFade()
-                .into(view.imageView)
+            Glide.with(view).load(uri).into(view.imageView)
 
             view.setOnClickListener {
                 listener.onItemClick(uri)
