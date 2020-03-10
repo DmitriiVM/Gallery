@@ -61,6 +61,7 @@ class ColorRecyclerAdapter(
             Picasso.get().load(uri)
                 .placeholder(R.drawable.ic_image_black_24dp)
                 .fit()
+                .centerCrop()
                 .noFade()
                 .into(view.imageView)
 

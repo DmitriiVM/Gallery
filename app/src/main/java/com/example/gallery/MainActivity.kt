@@ -126,6 +126,7 @@ class MainActivity : AppCompatActivity(), ColorRecyclerAdapter.OnItemClickListen
         Picasso.get()
             .load(uri)
             .fit()
+            .centerCrop()
             .into(dialog.imagePreview)
         dialog.show()
     }
